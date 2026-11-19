@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campus Coffee Sales Analysis | Jordan Lee</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="../index.html">Jordan Lee</a>
+      <nav class="nav">
+        <a href="../index.html#projects">Projects</a>
+        <a href="../index.html#about">About</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap project">
+    <a class="back" href="../index.html#projects">&larr; All projects</a>
+    <h1>Campus Coffee Sales Analysis</h1>
+    <p class="meta">Course project, Spring 2026</p>
+    <p>I analyzed one semester of point-of-sale data from three campus coffee shops to find when and where revenue comes from, then suggested staffing and menu changes.</p>
+
+    <h2>The question</h2>
+    <p>Where does the revenue come from, and when are the stores busiest? The answers should help plan staff hours and menu changes.</p>
+
+    <h2>The data</h2>
+    <p>The data is one semester of transactions from Green Street, Library Kiosk and Research Park, from January 5 to May 8, 2026. Each row is one line on a sale: date, hour, store, item, category, unit price and quantity. The file has 13,829 rows with no missing values and no duplicate rows. Revenue is unit price times quantity, and the term total is $83,046.</p>
+    <p>The data has no costs, wages or margins, so these findings are about revenue, not profit.</p>
+
+    <h2>What I did</h2>
+    <ul>
+      <li>Checked the file for missing values, duplicate rows and items with more than one price.</li>
+      <li>Added up revenue by store, category, item and day.</li>
+      <li>Grouped sales by weekday and hour. The heatmap divides each total by the number of that weekday in the term, so it shows a typical day.</li>
+      <li>Compared the spring break week with a typical week.</li>
+    </ul>
+
+    <h2>Charts</h2>
+    <figure>
+      <img src="campus-coffee/weekly-revenue.png" alt="Line chart of weekly revenue for all stores, with spring break shaded. Revenue falls to about $1,700 in the break week and peaks at about $6,000 in the week ending May 3." width="1966" height="768" loading="lazy">
+      <figcaption>Weekly revenue across all three stores. Spring break (shaded) is the sharpest drop of the term. The busiest week ended May 3.</figcaption>
+    </figure>
+    <figure>
+      <img src="campus-coffee/revenue-by-category-store.png" alt="Bar chart of revenue by category at each store. Coffee is the largest category at all three stores, and Green Street has the highest revenue in every category." width="1768" height="768" loading="lazy">
+      <figcaption>Revenue by category and store. Coffee is the largest category everywhere, and Green Street leads in each category.</figcaption>
+    </figure>
+    <figure>
+      <img src="campus-coffee/busy-hours-heatmap.png" alt="Heatmap of average items sold per day by hour and weekday. The darkest cells fall between 10 a.m. and noon on weekdays. Weekends are much lighter." width="1848" height="768" loading="lazy">
+      <figcaption>Average items sold per day, by hour and weekday. Weekday late mornings (10 to 12) are the peak. Weekends are much quieter.</figcaption>
+    </figure>
+
+    <h2>Interactive charts</h2>
+    <p>These two charts are drawn with Plotly.js from a small summary file, not from the full transaction file. Hover over a chart for details.</p>
+    <figure>
+      <div id="daily-chart" class="plot" role="img" aria-label="Interactive line chart of daily revenue for each store"></div>
+      <figcaption>Daily revenue by store. Hover to compare the three stores on the same day. Click a store in the legend to hide it.</figcaption>
+    </figure>
+    <figure>
+      <div id="items-chart" class="plot" role="img" aria-label="Interactive bar chart of revenue by menu item, colored by category"></div>
+      <figcaption>Revenue by menu item, colored by category. Hover to see units sold.</figcaption>
+    </figure>
+
+    <h2>Findings</h2>
+    <ol>
+      <li><strong>Green Street brings in the most revenue:</strong> $35,434, or 42.7% of the total. It leads in every category, so it should get the most staff hours.</li>
+      <li><strong>Spring break cut weekly revenue by about two thirds.</strong> The break week brought in $1,678, against about $4,800 in a typical week. Shorter hours that week would save labor cost.</li>
+      <li><strong>Late morning is the busiest time.</strong> On weekdays, sales peak between 10 and 12. Weekdays bring in 87% of revenue.</li>
+      <li><strong>Library Kiosk peaks in the afternoon.</strong> About 64% of its revenue comes after 2 p.m., so its staffing should start later than the other stores.</li>
+      <li><strong>Lattes bring in the most revenue:</strong> $19,121, ahead of breakfast sandwiches ($13,444) and drip coffee ($13,288). A coffee and breakfast sandwich bundle could raise the average order.</li>
+    </ol>
+    <p>The labor savings and the bundle idea are untested. The data has no cost or order-size detail, so the next step would be to check them against wage and receipt data.</p>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">Jordan Lee is a fictional student. This portfolio is a demo for a course guide.</div>
+  </footer>
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <script>
+    (function () {
+      var config = { responsive: true, displaylogo: false };
+      var storeColors = { 'Green Street': '#2f6f5e', 'Library Kiosk': '#c2713b', 'Research Park': '#4f6fa8' };
+      var categoryColors = { Coffee: '#2f6f5e', Food: '#c2713b', Tea: '#4f6fa8' };
+
+      function showError() {
+        document.querySelectorAll('.plot').forEach(function (el) {
+          el.textContent = 'This chart could not load. Please try again later.';
+        });
+      }
+
+      fetch('campus-coffee/data/summary.json')
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+          var lines = Object.keys(data.daily_revenue).map(function (store) {
+            var s = data.daily_revenue[store];
+            return {
+              type: 'scatter',
+              mode: 'lines',
+              name: store,
+              x: s.dates,
+              y: s.revenue,
+              line: { color: storeColors[store], width: 2 },
+              hovertemplate: '$%{y:,.0f}<extra>' + store + '</extra>'
+            };
+          });
+
+          Plotly.newPlot('daily-chart', lines, {
+            title: { text: 'Daily revenue by store', font: { size: 16 } },
+            hovermode: 'x unified',
+            yaxis: { title: 'Revenue ($)', tickprefix: '$', separatethousands: true, automargin: true },
+            xaxis: { automargin: true },
+            legend: { orientation: 'h', y: -0.18 },
+            margin: { t: 50, r: 16, b: 70, l: 60 },
+            paper_bgcolor: '#ffffff',
+            plot_bgcolor: '#ffffff'
+          }, config);
+
+          var order = data.items.map(function (d) { return d.item; });
+          var bars = ['Coffee', 'Food', 'Tea'].map(function (category) {
+            var rows = data.items.filter(function (d) { return d.category === category; });
+            return {
+              type: 'bar',
+              orientation: 'h',
+              name: category,
+              x: rows.map(function (d) { return d.revenue; }),
+              y: rows.map(function (d) { return d.item; }),
+              customdata: rows.map(function (d) { return d.units; }),
+              marker: { color: categoryColors[category] },
+              hovertemplate: '%{y}<br>Revenue: $%{x:,.0f}<br>Units sold: %{customdata:,}<extra>' + category + '</extra>'
+            };
+          });
+
+          Plotly.newPlot('items-chart', bars, {
+            title: { text: 'Revenue by menu item', font: { size: 16 } },
+            barmode: 'overlay',
+            xaxis: { title: 'Revenue ($)', tickprefix: '$', separatethousands: true },
+            yaxis: { type: 'category', categoryorder: 'array', categoryarray: order, automargin: true },
+            legend: { orientation: 'h', y: -0.2 },
+            margin: { t: 50, r: 16, b: 70, l: 20 },
+            paper_bgcolor: '#ffffff',
+            plot_bgcolor: '#ffffff'
+          }, config);
+        })
+        .catch(showError);
+    })();
+  </script>
+</body>
+</html>
