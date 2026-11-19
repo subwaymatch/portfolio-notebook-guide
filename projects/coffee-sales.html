@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campus Coffee Sales Analysis | Jordan Lee</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="../index.html">Jordan Lee</a>
+      <nav class="nav">
+        <a href="../index.html#projects">Projects</a>
+        <a href="../index.html#about">About</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap project coffee-sales">
+    <a class="back" href="../index.html#projects">&larr; All projects</a>
+    <h1>Campus Coffee Sales Analysis</h1>
+    <p class="meta">Course project, Spring 2026</p>
+    <p>I analyzed one semester of point-of-sale data from three campus coffee shops to find when and where revenue comes from, then suggested staffing and menu changes.</p>
+
+    <h2>The question</h2>
+    <p>Where does the revenue come from, and when are the stores busiest? The answers should help plan staff hours and menu changes.</p>
+
+    <h2>The data</h2>
+    <p>The data is one semester of transactions from Green Street, Library Kiosk and Research Park, from January 5 to May 8, 2026. Each row is one line on a sale: date, hour, store, item, category, unit price and quantity. I checked 13,829 rows for missing values and exact duplicates; neither was present. Revenue is unit price times quantity, and the term total is $83,046.</p>
+    <p>The data has no costs, wages or margins, so these findings are about revenue, not profit.</p>
+
+    <h2>What I did</h2>
+    <ul>
+      <li>Used pandas to check missing values and exact duplicates, and calculated revenue as unit price × quantity.</li>
+      <li>Added up revenue by store, category, item and day.</li>
+      <li>Grouped sales by weekday and hour. The heatmap divides each total by the number of that weekday in the term, so it shows a typical day.</li>
+      <li>Used Matplotlib and seaborn to chart weekly revenue, category mix and hourly demand; used Plotly to explore daily sales and menu items.</li>
+    </ul>
+
+    <h2>Charts</h2>
+    <p>Select any image to view it at full size.</p>
+    <figure>
+      <a href="coffee-sales/weekly-revenue.png" aria-label="Open chart at full size"><img src="coffee-sales/weekly-revenue.png" alt="Line chart of weekly revenue for all stores, with spring break shaded. Revenue falls to about $1,700 in the break week and peaks at about $6,000 in the week ending May 3." width="1966" height="768" loading="lazy"></a>
+      <figcaption>Weekly revenue across all three stores. Spring break (shaded) is the sharpest drop of the term. The busiest week ended May 3.</figcaption>
+    </figure>
+    <figure>
+      <a href="coffee-sales/revenue-by-category-store.png" aria-label="Open chart at full size"><img src="coffee-sales/revenue-by-category-store.png" alt="Bar chart of revenue by category at each store. Coffee is the largest category at all three stores, and Green Street has the highest revenue in every category." width="1768" height="768" loading="lazy"></a>
+      <figcaption>Revenue by category and store. Coffee is the largest category everywhere, and Green Street leads in each category.</figcaption>
+    </figure>
+    <figure>
+      <a href="coffee-sales/busy-hours-heatmap.png" aria-label="Open chart at full size"><img src="coffee-sales/busy-hours-heatmap.png" alt="Heatmap of average items sold per day by hour and weekday. The darkest cells fall between 10 a.m. and noon on weekdays. Weekends are much lighter." width="1848" height="768" loading="lazy"></a>
+      <figcaption>Average items sold per day, by hour and weekday. Weekday late mornings (10 to 12) are the peak. Weekends are much quieter.</figcaption>
+    </figure>
+
+    <h2>Interactive charts</h2>
+    <p>Hover or tap for details. Select a store or category in the legend to hide or show it.</p>
+    <noscript><p>Enable JavaScript to explore the charts. The findings below summarize their main results.</p></noscript>
+    <figure>
+      <div id="daily-chart" class="plot" role="img" aria-label="Interactive line chart of daily revenue for each store"></div>
+      <figcaption>Daily revenue by store. Hover to compare the three stores on the same day. Click a store in the legend to hide it.</figcaption>
+    </figure>
+    <figure>
+      <div id="items-chart" class="plot" role="img" aria-label="Interactive bar chart of revenue by menu item, colored by category"></div>
+      <figcaption>Revenue by menu item, colored by category. Hover to see units sold.</figcaption>
+    </figure>
+
+    <h2>Findings</h2>
+    <ol>
+      <li><strong>Green Street brings in the most revenue:</strong> $35,434, or 42.7% of the total. It leads in every category, making it a priority for a staffing review. Revenue alone does not measure workload.</li>
+      <li><strong>The week ending March 22 brought in $1,678:</strong> 64% below the median observed week ($4,661). The notebook marks March 14–22 as spring break; reduced hours during that period are worth testing. The final weekly bin covers only five days.</li>
+      <li><strong>Late morning is the busiest time.</strong> On weekdays, sales peak between 10 and 12. Weekdays bring in 87% of revenue.</li>
+      <li><strong>Library Kiosk peaks in the afternoon.</strong> About 64% of its revenue comes at 2 p.m. or later, suggesting a later staffing peak to test against hourly workload.</li>
+      <li><strong>Lattes bring in the most revenue:</strong> $19,121, ahead of breakfast sandwiches ($13,444) and drip coffee ($13,288). A coffee and breakfast sandwich bundle could raise the average order.</li>
+    </ol>
+    <p>These are descriptive findings from one semester, not measured business outcomes. I would test staffing and bundle changes against wage, cost and receipt data before recommending a rollout.</p>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">Jordan Lee is a fictional student. This portfolio is a demo for a course guide.</div>
+  </footer>
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8" defer></script>
+  <script src="coffee-sales/charts.js" defer></script>
+</body>
+</html>
