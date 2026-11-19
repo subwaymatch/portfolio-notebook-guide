@@ -51,8 +51,15 @@ h2 { font-size: 1.6rem; margin: 0 0 20px; }
 .project figure img { width: 100%; height: auto; display: block; }
 .project figcaption { color: var(--muted); font-size: .9rem; margin-top: 8px; }
 .project .plot { width: 100%; height: 400px; }
+.coffee-sales { padding-inline: 24px; }
+.coffee-sales .plot { min-width: 0; height: 460px; }
+.coffee-sales figure { min-width: 0; }
+.coffee-sales figure a:focus-visible { outline: 3px solid var(--accent); display: block; }
 .site-footer { border-top: 1px solid var(--line); padding: 28px 0; color: var(--muted); font-size: .9rem; }
 @media (max-width: 720px) {
   .about { grid-template-columns: 1fr; }
   .nav a { margin-left: 14px; }
+  .coffee-sales { padding-inline: 16px; }
+  .coffee-sales figure { padding: 8px; }
+  .coffee-sales .plot { height: 480px; }
 }
