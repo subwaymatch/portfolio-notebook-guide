@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campus Coffee Sales | Jordan Lee</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="../index.html">Jordan Lee</a>
+      <nav class="nav">
+        <a href="../index.html#projects">Projects</a>
+        <a href="../index.html#about">About</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap project">
+    <a class="back" href="../index.html#projects">&larr; All projects</a>
+    <h1>Campus Coffee Sales</h1>
+    <p class="meta">Course project, Spring 2026 · Point-of-sale analysis</p>
+
+    <h2>The question</h2>
+    <p>When and where does sales revenue come from at the campus coffee shops, and what can those patterns suggest about staffing and the menu?</p>
+
+    <h2>The data and approach</h2>
+    <p>I analyzed 13,829 transaction lines from Green Street, Library Kiosk and Research Park, covering January 5 to May 8, 2026. I calculated revenue from item price and quantity, then compared sales by week, store, category, hour, weekday and menu item. Hourly activity is normalized by the number of dates observed for each weekday.</p>
+    <p>These are sales patterns, not profit: the data does not include labor or product costs.</p>
+
+    <h2>What the charts show</h2>
+    <figure>
+      <img src="campus-coffee/weekly-revenue.png" alt="Weekly revenue line chart with spring break highlighted">
+      <figcaption>Weekly revenue across the three stores. The highlighted spring-break week is much quieter than the surrounding weeks.</figcaption>
+    </figure>
+    <figure>
+      <img src="campus-coffee/revenue-by-category-store.png" alt="Bar chart comparing revenue categories at each store">
+      <figcaption>Revenue by store and product category; coffee is the largest category at each location.</figcaption>
+    </figure>
+    <figure>
+      <img src="campus-coffee/hourly-heatmap.png" alt="Heatmap of average items sold by hour and weekday">
+      <figcaption>Average items sold per day by hour and weekday. Weekday late mornings stand out; weekend activity is lower.</figcaption>
+    </figure>
+
+    <h2>Interactive views</h2>
+    <figure>
+      <div id="daily-revenue-chart" role="img" aria-label="Interactive line chart of daily revenue by store"></div>
+      <figcaption>Daily revenue by store. Hover for values and click a store in the legend to show or hide its line.</figcaption>
+    </figure>
+    <figure>
+      <div id="menu-revenue-chart" role="img" aria-label="Interactive bar chart of revenue by menu item"></div>
+      <figcaption>Revenue by menu item; hover to compare units sold. Click a category in the legend to filter it.</figcaption>
+    </figure>
+
+    <h2>Findings and opportunities</h2>
+    <ul>
+      <li>Green Street generated 42.7% of sales revenue, the largest share. It may warrant the most coverage, subject to labor costs.</li>
+      <li>Revenue in the spring-break week fell to about one-third of a typical week. Shorter hours could be considered when campus traffic is low.</li>
+      <li>Late morning was busiest overall on weekdays, while the Library Kiosk's strongest hours were 2–3 p.m. Staffing schedules could reflect each location's peak.</li>
+      <li>Lattes led menu revenue, followed by breakfast sandwiches and drip coffee. A coffee-and-breakfast bundle is worth testing and measuring.</li>
+    </ul>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">Jordan Lee is a fictional student. This portfolio is a demo for a course guide.</div>
+  </footer>
+  <script>
+    const chartConfig = { responsive: true, displayModeBar: false };
+    const chartLayout = {
+      autosize: true,
+      margin: { t: 40, r: 20, b: 55, l: 58 },
+      font: { family: "Inter, system-ui, sans-serif", color: "#1d2433" },
+      paper_bgcolor: "#ffffff",
+      plot_bgcolor: "#ffffff"
+    };
+
+    fetch("campus-coffee/chart-summary.json")
+      .then(response => {
+        if (!response.ok) throw new Error("Could not load chart summary data.");
+        return response.json();
+      })
+      .then(data => {
+        const stores = [...new Set(data.dailyRevenue.map(row => row[1]))];
+        const dailyTraces = stores.map(store => {
+          const rows = data.dailyRevenue.filter(row => row[1] === store);
+          return {
+            x: rows.map(row => row[0]),
+            y: rows.map(row => row[2]),
+            name: store,
+            type: "scatter",
+            mode: "lines",
+            hovertemplate: "%{x|%b %-d}<br>$%{y:,.0f}<extra>" + store + "</extra>"
+          };
+        });
+        Plotly.newPlot("daily-revenue-chart", dailyTraces, {
+          ...chartLayout,
+          title: { text: "Daily revenue by store", x: 0.02 },
+          hovermode: "x unified",
+          xaxis: { title: "", automargin: true },
+          yaxis: { title: "Revenue ($)", tickprefix: "$", separatethousands: true, automargin: true }
+        }, chartConfig);
+
+        const items = data.itemRevenue;
+        const categories = [...new Set(items.map(item => item[1]))];
+        const colors = { Coffee: "#2f6f5e", Food: "#e49a43", Tea: "#597fa8" };
+        const itemTraces = categories.map(category => {
+          const rows = items.filter(item => item[1] === category);
+          return {
+            x: rows.map(item => item[2]),
+            y: rows.map(item => item[0]),
+            text: rows.map(item => item[3]),
+            name: category,
+            type: "bar",
+            orientation: "h",
+            marker: { color: colors[category] || "#7b8190" },
+            hovertemplate: "%{y}<br>Revenue: $%{x:,.0f}<br>Units: %{text:,}<extra>" + category + "</extra>"
+          };
+        });
+        Plotly.newPlot("menu-revenue-chart", itemTraces, {
+          ...chartLayout,
+          title: { text: "Revenue by menu item", x: 0.02 },
+          barmode: "group",
+          xaxis: { title: "Revenue ($)", tickprefix: "$", separatethousands: true, automargin: true },
+          yaxis: { title: "", automargin: true, categoryorder: "array", categoryarray: items.map(item => item[0]) }
+        }, chartConfig);
+      })
+      .catch(error => {
+        document.querySelectorAll("#daily-revenue-chart, #menu-revenue-chart").forEach(chart => {
+          chart.textContent = error.message;
+        });
+      });
+  </script>
+</body>
+</html>
